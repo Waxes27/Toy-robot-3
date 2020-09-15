@@ -1,6 +1,6 @@
 
 # list of valid command names
-valid_commands = ['off', 'help', 'forward', 'back', 'right', 'left', 'sprint']
+valid_commands = ['off', 'help', 'forward', 'back', 'right', 'left', 'sprint', 'replay' ,'replay silent']
 
 # variables tracking position and direction
 position_x = 0
@@ -12,7 +12,17 @@ current_direction_index = 0
 min_y, max_y = -200, 200
 min_x, max_x = -100, 100
 
+
 #TODO: WE NEED TO DECIDE IF WE WANT TO PRE_POPULATE A SOLUTION HERE, OR GET STUDENT TO BUILD ON THEIR PREVIOUS SOLUTION.
+def do_replay(history,robot_name,command_name,arg):
+    commands = ["silent"]
+    if arg in commands:
+        print("hello")
+    for i in history:
+        handle_command(robot_name, i,history)
+    if command_name == "silent":
+        return True, " > {} replayed {} commands silently.".format(robot_name,len(history))
+    return True, " > {} replayed {} commands.".format(robot_name,len(history))
 
 def get_robot_name():
     name = input("What do you want to name your robot? ")
@@ -29,6 +39,7 @@ def get_command(robot_name):
 
     prompt = ''+robot_name+': What must I do next? '
     command = input(prompt)
+    print(valid_command(command))
     while len(command) == 0 or not valid_command(command):
         output(robot_name, "Sorry, I did not understand '"+command+"'.")
         command = input(prompt)
@@ -67,8 +78,7 @@ def valid_command(command):
     """
 
     (command_name, arg1) = split_command_input(command)
-
-    return command_name.lower() in valid_commands and (len(arg1) == 0 or is_int(arg1))
+    return command_name.lower() in valid_commands and len(arg1) == 0 or is_int(arg1)
 
 
 def output(name, message):
@@ -151,7 +161,8 @@ def do_back(robot_name, steps):
     Moves the robot forward the number of steps
     :param robot_name:
     :param steps:
-    :return: (True, forward output text)
+    :return: (True, forward output text)    elif command_name == 'help':
+        (do_next, command_output) = do_help()
     """
 
     if update_position(-steps):
@@ -206,16 +217,15 @@ def do_sprint(robot_name, steps):
         return do_sprint(robot_name, steps - 1)
 
 
-def handle_command(robot_name, command):
+def handle_command(robot_name, command,history):
     """
     Handles a command by asking different functions to handle each command.
     :param robot_name: the name given to robot
     :param command: the command entered by user
     :return: `True` if the robot must continue after the command, or else `False` if robot must shutdown
     """
-
+    print("kick")
     (command_name, arg) = split_command_input(command)
-
     if command_name == 'off':
         return False
     elif command_name == 'help':
@@ -230,6 +240,12 @@ def handle_command(robot_name, command):
         (do_next, command_output) = do_left_turn(robot_name)
     elif command_name == 'sprint':
         (do_next, command_output) = do_sprint(robot_name, int(arg))
+    # elif "replay" in command_name:
+    #     (do_next, command_output) = do_replay(history,robot_name,command_name,arg)
+        #command_output = do_replay(history)
+    elif command_name == 'replay silent':
+        (do_next, command_output) = do_replay(history,robot_name,command_name,arg)
+        command_output = do_replay(history)
 
     print(command_output)
     show_position(robot_name)
@@ -247,11 +263,16 @@ def robot_start():
     position_x = 0
     position_y = 0
     current_direction_index = 0
-
+    history = []
     command = get_command(robot_name)
-    while handle_command(robot_name, command):
-        command = get_command(robot_name)
+    if command != "replay":
+        history.append(command)
 
+    while handle_command(robot_name, command,history):
+        command = get_command(robot_name)
+        if command != "replay":
+            history.append(command)
+        #print(history)
     output(robot_name, "Shutting down..")
 
 
