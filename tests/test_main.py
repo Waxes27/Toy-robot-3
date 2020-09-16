@@ -401,8 +401,9 @@ HAL: What must I do next? HAL: Shutting down..""", output)
     def test_step3_replay_silent_reversed(self):
         with captured_io(StringIO('HAL\nforward 10\nforward 5\nreplay reversed silent\noff\n')) as (out, err):
             robot.robot_start()
-
+            
         output = out.getvalue().strip()
+        self.maxdiff = None
         self.assertEqual("""What do you want to name your robot? HAL: Hello kiddo!
 HAL: What must I do next?  > HAL moved forward by 10 steps.
  > HAL now at position (0,10).
