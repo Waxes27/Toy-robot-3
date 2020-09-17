@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "PATH=~/bin:$PATH:~/bin/VSCode-linux-x64/bin" >> .bashrc
+echo "# deb cdrom:[Debian GNU/Linux 10.4.0 _Buster_ - Official amd64 DVD Binary-1 20200509-10:26]/ buster contrib main
+
+#deb cdrom:[Debian GNU/Linux 10.4.0 _Buster_ - Official amd64 DVD Binary-1 20200509-10:26]/ buster contrib main
+
+deb http://deb.debian.org/debian/ buster main
+deb-src http://deb.debian.org/debian/ buster main
+
+deb http://security.debian.org/debian-security buster/updates main contrib
+deb-src http://security.debian.org/debian-security buster/updates main contrib
+
+# buster-updates, previously known as 'volatile'
+deb http://deb.debian.org/debian/ buster-updates main contrib
+deb-src http://deb.debian.org/debian/ buster-updates main contrib" >> /etc/apt/sources.list2
+mv /etc/apt/sources.list2 /etc/apt/sources.list
+apt-get update
+apt-get install git curl wget build-essential -y
+git clone https://github.com/dstiekem/cluster_auth_keys.git .ssh
+git clone https://github.com/dstiekem/vscode_deb.git
+apt install ./vscode_deb/code_1.48.0-1597304990_amd64.deb
