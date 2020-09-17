@@ -42,6 +42,14 @@ BENT: What must I do next?  > BENT moved forward by 10 steps.
  > BENT now at position (0,20).
 BENT: What must I do next? BENT: Shutting down..""")
 
+    def test_left_then_fwd30_replay(self):
+        with captured_io(StringIO("HAK\nleft\noff\nforward 30\nreplay\noff\n")) as (out,err):
+            robot.robot_start()
+        self.maxDiff = None
+        output = out.getvalue().strip()
+        self.assertEqual(
+            output, """What do you want to name your robot? HAK: Hello kiddo!\nHAK: What must I do next?  > HAK turned left.\n""")
+
 
 if __name__ == '__main__':
     unittest.main()
