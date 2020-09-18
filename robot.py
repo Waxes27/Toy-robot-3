@@ -1,7 +1,8 @@
+import time
 
 # list of valid command names
 valid_commands = ['off', 'help', 'forward', 'back', 'right', 'left', 'sprint','replay']
-flags = ['silent','reversed', 'reversed silent']
+flags = ['silent','reversed', 'reversed silent','2 reversed']
 # variables tracking position and direction
 position_x = 0
 position_y = 0
@@ -15,30 +16,75 @@ min_x, max_x = -100, 100
 
 #TODO: WE NEED TO DECIDE IF WE WANT TO PRE_POPULATE A SOLUTION HERE, OR GET STUDENT TO BUILD ON THEIR PREVIOUS SOLUTION.
 
+def range_finder(command):
+    """
+    finds and returns the range
+    """
+    command1 = command.split("-")
+    list_ = []
+    if len(command1) == 1:
+        return True, command.split(" ")
+    if len(command1) == 2:
+        list_.append(int(command1[0][-1]))
+        list_.append(int(command1[1][0]))
+        return True, list_
+    elif len(command1) == 1:
+        command1 = command.split(" ")
+        list_.append(int(command1[1]))
+        return True, list_
+    else:
+        return False, ""
+
+    
 
 def replay(robot_name, command, history):
-    if 'reversed' in command:
+    
+    #history = ['forward 3', 'forward 2','forward 1']
+    j= 0
+    decider, ranger = range_finder(command)
+    num = 1
+    if decider == True:
+        for i in range(9):
+            if str(i) in command:
+                num = i
+
+
+    if decider == True:
+        #print(decider)
+        #print(ranger)
+        #print(num)
+        if 'reversed' in command:
+            if 'silent' in command:
+                for i in reversed(history[num-1:]):
+                    #print(history)
+                    j += 1
+                    handle_command_silent(robot_name, i, history)
+                return True, " > {} replayed {} commands in reverse silently.".format(robot_name,j)
+            else:
+                print(list(reversed(history[1:])))
+                print(((history[num:])))
+                for i in reversed(history[num:]):
+                    print(num)
+
+                    j += 1
+                    #print(j)
+                    handle_command(robot_name, i, history)
+                return True, " > {} replayed {} commands in reverse.".format(robot_name,j)
+
         if 'silent' in command:
-            for i in reversed(history):
-                #print(history)
+            for i in history:
                 handle_command_silent(robot_name, i, history)
-            return True, " > {} replayed {} commands in reverse silently.".format(robot_name,len(history))
+            return True, " > {} replayed {} commands silently.".format(robot_name,len(history))
+
         else:
-            for i in reversed(history):
-                #print(history)
+            for i in history[num-1:]:
+                #print(i)
+                j += 1
                 handle_command(robot_name, i, history)
-            return True, " > {} replayed {} commands in reverse.".format(robot_name,len(history))
+            return True, " > {} replayed {} commands.".format(robot_name,j)
 
-    if 'silent' in command:
-        for i in history:
-            handle_command_silent(robot_name, i, history)
-        return True, " > {} replayed {} commands silently.".format(robot_name,len(history))
 
-    else:
-        for i in history:
-            handle_command(robot_name, i, history)
-        return True, " > {} replayed {} commands.".format(robot_name,len(history))
-        
+
 
 def get_robot_name():
     name = input("What do you want to name your robot? ")
@@ -95,8 +141,8 @@ def valid_command(command):
     """
 
     (command_name, arg1) = split_command_input(command)
-    # if len(arg1.split()) == 2:
-    #     arg1, arg2 = split_command_input(arg1)
+    #print(arg1)
+
     
 
     return command_name.lower() in valid_commands and (len(arg1) == 0 or is_int(arg1)) or arg1 in flags
@@ -322,6 +368,9 @@ def robot_start():
         #print(history)
     output(robot_name, "Shutting down..")
 
-
 if __name__ == "__main__":
+    history = ['forward 3', 'forward 2', 'forward 1','replay 2','off']
+
+    #replay("HAL","replay 2 reversed",['forward 3', 'forward 2', 'forward 1'])
     robot_start()
+    #print(range_finder("replay"))
