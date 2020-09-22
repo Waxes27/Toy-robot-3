@@ -311,6 +311,7 @@ HAL: What must I do next? HAL: Shutting down..""", output)
             robot.robot_start()
 
         output = out.getvalue().strip()
+        self.maxDiff = None
         self.assertEqual("""What do you want to name your robot? HAL: Hello kiddo!
 HAL: What must I do next?  > HAL moved forward by 10 steps.
  > HAL now at position (0,10).
