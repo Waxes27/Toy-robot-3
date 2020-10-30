@@ -20,7 +20,11 @@ def range_handler(command):
     """
     handles ranged commands
     """
-
+    
+    if len(command.split("-")) == 2:
+        command = command.split("-")
+        # print(command)
+        return list(command[0])[-1],command[1]
     if len(command.split()) == 1:
         return 0
     elif is_int(command.split()[1]):
@@ -72,18 +76,51 @@ def ranged_basic(robot_name, history,command,j):
     return True, ' > {} replayed {} commands.'.format(robot_name, j)
 
 
+def ranged_silent(robot_name, history,command,j):
+    ranger = range_handler(command)
+    # print(ranger)
+    for i in (history[int(ranger)-1:]):
+        handle_command_silent(robot_name,i,history)
+        j += 1
+    
+    return True, f" > {robot_name} replayed {j} commands silently."    
 
+
+def ranged_full(robot_name, history,command,j):
+    m,n = range_handler(command)
+    ranger = int(m) - int(n)
+    # print(history)
+    for i in history[int(n)-1:int(m)-1]:
+        handle_command(robot_name,i,history)
+        j += 1
+    return True, f" > {robot_name} replayed {j} commands."
+    
+    
+    
 def replay(robot_name, command, history):
     j =0
+    # print("h")
+    if '-' in command:
+        do_next, output = ranged_full(robot_name, history, command,j)
+        return do_next, output
+        
     if 'silent' in command and 'reversed' in command:
         do_next, output = rev_silent(robot_name, history, command,j)
         return do_next, output
+    
     elif 'silent' in command:
-        do_next, output = silent(robot_name, history, command,j)
-        return do_next, output
+        if is_int(command.split()[1]) and 'silent' in command:
+            # print("hey")
+            do_next, output = ranged_silent(robot_name, history,command,j)
+            return do_next, output
+        else:
+            do_next, output = silent(robot_name, history, command,j)
+            return do_next, output
+    
     elif 'reversed' in command and len(command.split()) ==2:
         do_next, output = reverse(robot_name, history, command,j)
         return do_next, output
+    
     elif len(command.split()) < 2:
         for i in history[:]:
             j += 1
@@ -91,10 +128,25 @@ def replay(robot_name, command, history):
         return True, ' > {} replayed {} commands.'.format(robot_name, j)
 
     if is_int(command.split()[1]) and len(command.split()) == 2:
-        print("hey")
+        # print("hey")
         do_next, output = ranged_basic(robot_name, history,command,j)
         return do_next, output
-        
+    
+    if is_int(command.split()[1]) and 'reversed' in command:
+        # print("hey")
+        do_next, output = ranged_reversed_basic(robot_name, history,command,j)
+        return do_next, output
+
+
+def ranged_reversed_basic(robot_name, history,command,j):
+    ranger = range_handler(command)
+    # print(ranger)
+    for i in reversed(history[:int(ranger)]):
+        handle_command(robot_name,i,history)
+        j += 1
+    
+    return True, f" > {robot_name} replayed {j} commands in reverse."
+
 
 def get_robot_name():
     name = input("What do you want to name your robot? ")
@@ -149,10 +201,13 @@ def valid_command(command):
     Returns a boolean indicating if the robot can understand the command or not
     Also checks if there is an argument to the command, and if it a valid int
     """
-
+    # print(command)
     (command_name, arg1) = split_command_input(command)
     args = arg1.split()
+    # print(arg1.split("-"))
     if command_name.lower() in valid_commands:
+        if len(arg1.split("-")) == 2:
+            return True
         for i in reversed(args):
             if i in flags or is_int(i) or len(args) ==0:
                 #continue
@@ -370,6 +425,7 @@ def robot_start():
     """This is the entry point for starting my robot"""
 
     global position_x, position_y, current_direction_index
+    # print("h")
 
     robot_name = get_robot_name()
     output(robot_name, "Hello kiddo!")
@@ -393,7 +449,9 @@ def robot_start():
 if __name__ == "__main__":
     history = ['forward 3', 'forward 2', 'forward 1']
 
-    print(replay("HAL","replay 2 reversed",history))
-    #print(valid_command("replay silent asdc"))
+    # print(replay("HAL","replay 2 reversed",history))
+    # ranged_reversed_basic("hal", history,"replay 2 reversed",0)
+    # print(valid_command("replay 3-1"))
+    ranged_full("HAL", history,"replay 3-1",0)
     #robot_start()
-    #print(range_handler("replay 2 reversed"))
+    # print(range_handler("replay 3-1"))
